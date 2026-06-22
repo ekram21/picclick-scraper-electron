@@ -17,6 +17,7 @@
     "deploy:live": "bash scripts/deploy-live.sh patch",
     "deploy:live:minor": "bash scripts/deploy-live.sh minor",
     "deploy:live:major": "bash scripts/deploy-live.sh major",
+    "icons:generate": "bash scripts/generate-icons.sh",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -69,11 +70,18 @@
     "appId": "com.picclick.watcher",
     "productName": "PicClick Watcher",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "resources"
     },
     "files": [
       "out/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/icon.png",
+        "to": "icon.png"
+      }
     ],
     "mac": {
       "category": "public.app-category.utilities",

@@ -55,6 +55,10 @@ npm run deploy:live
 
 Auto-bumps version, pushes to GitHub, builds macOS + Windows, and ships OTA to all installed users. See [documentation/OTA_UPDATES.md](documentation/OTA_UPDATES.md) for full details.
 
+## Developer documentation
+
+Module-by-module guides for extending the project: [documentation/README.md](documentation/README.md)
+
 ## Project structure
 
 ```

@@ -32,13 +32,17 @@ In `package.json`, update the `build.publish` block:
 
 Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username or org.
 
-### 2. Ensure the repo is on GitHub
+### 2. Ensure the repo is on GitHub — and public
 
 Push this project to:
 
 ```
 https://github.com/YOUR_GITHUB_USERNAME/picclick-scraper-electron
 ```
+
+**The repository must be public** for OTA updates to work out of the box. Private repos return 404 to the app (no auth token is bundled). If you need a private repo, use a custom update server instead.
+
+You also need **at least one GitHub Release** published (run `npm run deploy:live` for the first one). Until then, the app will show “No published releases found yet” instead of an error.
 
 ### 3. (Recommended) Code signing
 
@@ -224,6 +228,16 @@ Before every release:
 ---
 
 ## Troubleshooting
+
+### 404 error / `releases.atom` in Settings
+
+This means the app cannot read GitHub Releases. Common causes:
+
+1. **No release published yet** — run `npm run deploy:live` once to create v1.0.0 on GitHub Releases
+2. **Repo is private** — GitHub returns 404 without authentication. **Make the repo public** (Settings → General → Change visibility) or use a custom update server
+3. **Wrong repo name** in `package.json` → `build.publish`
+
+After fixing, rebuild the app (`npm run dist:mac`) so users get the friendlier error messages, then ship via `deploy:live`.
 
 ### “Updates apply to installed builds only”
 

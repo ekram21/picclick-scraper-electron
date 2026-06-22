@@ -13,6 +13,33 @@ export function getUpdateStatus(): UpdateStatus {
   return currentStatus
 }
 
+function formatUpdateError(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err)
+
+  // Private GitHub repos return 404 without auth
+  if (
+    raw.includes('404') &&
+    (raw.includes('releases.atom') || raw.includes('github.com'))
+  ) {
+    return 'No published releases found yet. Ship the first release with npm run deploy:live. If the repo is private, make it public for OTA updates to work.'
+  }
+
+  if (raw.includes('403') || raw.toLowerCase().includes('authentication')) {
+    return 'Cannot reach GitHub Releases. If the repository is private, make it public or use a custom update server.'
+  }
+
+  if (raw.includes('net::') || raw.includes('ENOTFOUND') || raw.includes('network')) {
+    return 'Update check failed — check your internet connection and try again.'
+  }
+
+  // electron-updater sometimes embeds huge JSON response bodies in the message
+  if (raw.length > 120) {
+    return 'Update check failed. No release may be published yet, or GitHub Releases is unreachable.'
+  }
+
+  return `Update check failed: ${raw}`
+}
+
 function broadcast(status: Partial<UpdateStatus>): void {
   currentStatus = { ...currentStatus, ...status }
   for (const win of BrowserWindow.getAllWindows()) {
@@ -28,6 +55,7 @@ export function setupAutoUpdater(): void {
 
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.logger = null // suppress verbose updater logs in console
 
   autoUpdater.on('checking-for-update', () => {
     broadcast({ checking: true, message: 'Checking for updates…' })
@@ -66,10 +94,13 @@ export function setupAutoUpdater(): void {
   })
 
   autoUpdater.on('error', (err) => {
-    logger.error(`Auto-updater error: ${err.message}`)
+    const message = formatUpdateError(err)
+    logger.error(`Auto-updater error: ${message}`)
     broadcast({
       checking: false,
-      message: `Update check failed: ${err.message}`
+      available: false,
+      downloaded: false,
+      message
     })
   })
 
@@ -93,8 +124,8 @@ export async function checkForUpdates(): Promise<UpdateStatus> {
   try {
     await autoUpdater.checkForUpdates()
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Update check failed'
-    broadcast({ checking: false, message })
+    const message = formatUpdateError(err)
+    broadcast({ checking: false, available: false, downloaded: false, message })
   }
 
   return currentStatus

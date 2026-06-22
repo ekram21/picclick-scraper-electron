@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu, Tray, nativeImage, shell } from 'electron'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { DatabaseService } from './db/database'
 import { SchedulerService } from './services/scheduler'
 import { registerIpc } from './ipc'
@@ -13,8 +14,22 @@ let scheduler: SchedulerService
 
 const isDev = !app.isPackaged
 
+function getIconPath(): string {
+  const candidates = [
+    join(process.cwd(), 'resources/icon.png'),
+    join(__dirname, '../../resources/icon.png'),
+    join(process.resourcesPath, 'icon.png')
+  ]
+  return candidates.find((p) => existsSync(p)) ?? candidates[0]
+}
+
+function getAppIcon() {
+  return nativeImage.createFromPath(getIconPath())
+}
+
 function createWindow(): BrowserWindow {
   const isMac = process.platform === 'darwin'
+  const icon = getAppIcon()
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -22,6 +37,7 @@ function createWindow(): BrowserWindow {
     minWidth: 1024,
     minHeight: 700,
     show: false,
+    icon: icon.isEmpty() ? undefined : icon,
     frame: isMac ? undefined : false,
     titleBarStyle: isMac ? 'hidden' : undefined,
     trafficLightPosition: isMac ? { x: 16, y: 16 } : undefined,
@@ -65,8 +81,8 @@ function createWindow(): BrowserWindow {
 }
 
 function createTray(): void {
-  const icon = nativeImage.createEmpty()
-  tray = new Tray(icon)
+  const icon = getAppIcon()
+  tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon.resize({ width: 18, height: 18 }))
   tray.setToolTip('PicClick Watcher')
 
   const contextMenu = Menu.buildFromTemplate([
@@ -92,6 +108,13 @@ app.whenReady().then(() => {
   db = new DatabaseService()
   createWindow()
   createTray()
+
+  if (process.platform === 'darwin') {
+    const icon = getAppIcon()
+    if (!icon.isEmpty()) {
+      app.dock?.setIcon(icon)
+    }
+  }
 
   scheduler = new SchedulerService(db, () => mainWindow)
   registerIpc(db, scheduler, () => mainWindow)

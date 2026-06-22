@@ -157,11 +157,13 @@ export function SettingsPage() {
           <CardHeader>
             <CardTitle>Updates</CardTitle>
             <CardDescription>
-              Version {versionQuery.data ?? '…'} — OTA updates work in installed builds via GitHub Releases.
+              Version {versionQuery.data ?? '…'} — checks GitHub Releases for newer builds.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{updateStatus.message ?? 'Ready to check for updates'}</p>
+            <p className="rounded-lg border border-white/5 bg-zinc-950/50 px-3 py-2 text-sm leading-relaxed text-muted-foreground">
+              {updateStatus.message ?? 'Ready to check for updates'}
+            </p>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
