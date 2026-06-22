@@ -57,7 +57,9 @@ Without signing, updates may still work for users who already bypassed install w
 
 The repo includes `.github/workflows/release.yml`. It runs when you push a version tag (`v*`).
 
-No extra secrets are required for public repos — `GITHUB_TOKEN` is provided automatically.
+No extra secrets are required for public repos — `GITHUB_TOKEN` is provided automatically for the final publish step.
+
+CI builds use `--publish never` so electron-builder only creates installers locally; `softprops/action-gh-release` uploads them to GitHub Releases (no `GH_TOKEN` needed during the build step).
 
 ---
 

@@ -14,6 +14,8 @@
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:win": "npm run build && electron-builder --win",
+    "dist:mac:ci": "npm run build && electron-builder --mac --publish never",
+    "dist:win:ci": "npm run build && electron-builder --win --publish never",
     "deploy:live": "bash scripts/deploy-live.sh patch",
     "deploy:live:minor": "bash scripts/deploy-live.sh minor",
     "deploy:live:major": "bash scripts/deploy-live.sh major",

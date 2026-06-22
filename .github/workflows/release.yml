@@ -20,9 +20,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
-
-      - run: npm run dist:mac
+      - run: npm run dist:mac:ci
 
       - uses: actions/upload-artifact@v4
         with:
@@ -41,9 +39,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
-
-      - run: npm run dist:win
+      - run: npm run dist:win:ci
 
       - uses: actions/upload-artifact@v4
         with:
@@ -55,8 +51,6 @@ jobs:
     needs: [build-mac, build-win]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
