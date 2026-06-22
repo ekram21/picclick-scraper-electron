@@ -16,10 +16,22 @@ export function getUpdateStatus(): UpdateStatus {
 function formatUpdateError(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err)
 
+  if (
+    raw.includes('ERR_UPDATER_CHANNEL_FILE_NOT_FOUND') ||
+    raw.includes('Cannot find latest-mac.yml') ||
+    raw.includes('Cannot find latest.yml')
+  ) {
+    return 'Update metadata missing on GitHub release (latest-mac.yml / latest.yml). Republish the release from CI.'
+  }
+
+  if (raw.includes('404') && raw.includes('/download/')) {
+    return 'Update found but download failed — release file names on GitHub do not match. Install manually from GitHub Releases or wait for the next release.'
+  }
+
   // Private GitHub repos return 404 without auth
   if (
     raw.includes('404') &&
-    (raw.includes('releases.atom') || raw.includes('github.com'))
+    (raw.includes('releases.atom') || raw.includes('Unable to find latest version on GitHub'))
   ) {
     return 'No published releases found yet. Ship the first release with npm run deploy:live. If the repo is private, make it public for OTA updates to work.'
   }

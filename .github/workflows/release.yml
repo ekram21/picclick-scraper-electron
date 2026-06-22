@@ -22,10 +22,21 @@ jobs:
 
       - run: npm run dist:mac:ci
 
+      - name: Stage macOS release files
+        run: |
+          mkdir -p staged
+          find release -maxdepth 1 -type f \( \
+            -name '*.dmg' -o \
+            -name '*.zip' -o \
+            -name '*.yml' -o \
+            -name '*.blockmap' \
+          \) -exec cp {} staged/ \;
+          ls -la staged/
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-mac
-          path: release/**
+          path: staged/*
           if-no-files-found: error
 
   build-win:
@@ -41,10 +52,21 @@ jobs:
 
       - run: npm run dist:win:ci
 
+      - name: Stage Windows release files
+        shell: bash
+        run: |
+          mkdir -p staged
+          find release -maxdepth 1 -type f \( \
+            -name '*.exe' -o \
+            -name '*.yml' -o \
+            -name '*.blockmap' \
+          \) -exec cp {} staged/ \;
+          ls -la staged/
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-win
-          path: release/**
+          path: staged/*
           if-no-files-found: error
 
   publish:
@@ -55,16 +77,25 @@ jobs:
         with:
           path: artifacts
 
-      - name: Flatten release assets
+      - name: Merge release assets
         run: |
           mkdir -p release
-          find artifacts -type f -exec cp {} release/ \;
+          cp artifacts/release-mac/* release/
+          cp artifacts/release-win/* release/
+          # GitHub renames spaces to dots in asset URLs; yml references hyphenated names.
+          for f in release/*; do
+            base=$(basename "$f")
+            normalized=$(echo "$base" | tr ' ' '-')
+            if [ "$base" != "$normalized" ]; then
+              mv "release/$base" "release/$normalized"
+            fi
+          done
           ls -la release/
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: release/**
+          files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

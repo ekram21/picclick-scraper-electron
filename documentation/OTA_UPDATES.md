@@ -61,6 +61,8 @@ No extra secrets are required for public repos — `GITHUB_TOKEN` is provided au
 
 CI builds use `--publish never` so electron-builder only creates installers locally; `softprops/action-gh-release` uploads them to GitHub Releases (no `GH_TOKEN` needed during the build step).
 
+CI only uploads **top-level** files from `release/` (installers, `.blockmap`, `latest-*.yml`) — not unpacked app bundles like `release/mac-arm64/` or `release/win-unpacked/`. A healthy release should have roughly **6–8 assets**, not hundreds.
+
 ---
 
 ## Pushing an update (one command)
@@ -150,6 +152,8 @@ Open **GitHub → Releases → v1.0.1** and confirm these files exist:
 - `PicClick Watcher-x.x.x.dmg` (macOS — users install manually; updates use the `.zip`)
 
 If `latest-mac.yml` / `latest.yml` are missing, installed apps **cannot** detect updates.
+
+Release asset file names must match what `latest-mac.yml` references (no spaces — use hyphens). GitHub converts spaces in uploaded file names to dots in download URLs, which breaks `electron-updater` downloads.
 
 ### Step 5 — Users receive the update
 

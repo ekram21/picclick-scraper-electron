@@ -87,6 +87,7 @@
     ],
     "mac": {
       "category": "public.app-category.utilities",
+      "artifactName": "PicClick-Watcher-${version}-${arch}.${ext}",
       "target": [
         "dmg",
         "zip"
@@ -95,6 +96,7 @@
       "gatekeeperAssess": false
     },
     "win": {
+      "artifactName": "PicClick-Watcher-Setup-${version}.${ext}",
       "target": [
         "nsis"
       ]
