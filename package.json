@@ -1,6 +1,6 @@
 {
   "name": "picclick-watcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Monitor PicClick listings and send Discord alerts",
   "main": "./out/main/index.js",
   "author": "PicClick Watcher",
