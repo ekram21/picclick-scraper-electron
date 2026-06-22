@@ -1,0 +1,92 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-electron/
+out/
+release/
+build/
+*.tsbuildinfo
+
+# Electron / electron-builder
+*.dmg
+*.exe
+*.blockmap
+*.AppImage
+*.deb
+*.rpm
+*.snap
+latest*.yml
+builder-debug.yml
+builder-effective-config.yaml
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Local app data / SQLite (dev copies)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+data/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test & coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+*.local
+
+# Vite
+vite.config.ts.timestamp-*
+
+# TypeScript
+*.js.map
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE / editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Optional: user uploads / scratch (keep documentation tracked)
+uploads/
+tmp/
+temp/
