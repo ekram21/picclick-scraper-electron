@@ -44,20 +44,22 @@ https://github.com/YOUR_GITHUB_USERNAME/picclick-scraper-electron
 
 You also need **at least one GitHub Release** published (run `npm run deploy:live` for the first one). Until then, the app will show “No published releases found yet” instead of an error.
 
-### 3. (Recommended) Code signing
+### 3. Code signing (required for macOS in-app install)
 
 | Platform | Why it matters |
 |----------|----------------|
-| **macOS** | Unsigned apps may block updates or show Gatekeeper warnings. For production, use an Apple Developer ID certificate and notarize the app. |
+| **macOS** | **Required** for Squirrel.Mac in-app updates. CI signs and notarizes using Apple Developer ID secrets — see **[MACOS_SIGNING.md](./MACOS_SIGNING.md)** for one-time setup. |
 | **Windows** | Optional but recommended — reduces SmartScreen warnings. |
 
-Without signing, updates may still work for users who already bypassed install warnings, but signing is strongly recommended for distribution.
+Without macOS signing, update **checks and downloads** can still work, but **restart-to-install** will fail. The Settings page includes a manual `.dmg` download link as a fallback.
 
 ### 4. Enable GitHub Actions (automated releases)
 
 The repo includes `.github/workflows/release.yml`. It runs when you push a version tag (`v*`).
 
-No extra secrets are required for public repos — `GITHUB_TOKEN` is provided automatically for the final publish step.
+**macOS builds require signing secrets** — configure all five GitHub Actions secrets before releasing. Full walkthrough: **[MACOS_SIGNING.md](./MACOS_SIGNING.md)**.
+
+`GITHUB_TOKEN` is provided automatically for the publish step. No other secrets are required for Windows builds.
 
 CI builds use `--publish never` so electron-builder only creates installers locally; `softprops/action-gh-release` uploads them to GitHub Releases (no `GH_TOKEN` needed during the build step).
 
@@ -258,6 +260,10 @@ User is running `npm run dev`. They need the `.dmg` / `.exe` installer.
 | Version not bumped | New release must be **higher** semver than installed |
 | Private repo without token | App can’t read releases — use a public repo or configure a token (advanced) |
 | Tag / version mismatch | Tag `v1.0.2` must match `"version": "1.0.2"` |
+
+### “Restart & Install” appears then disappears / generic update error
+
+The zip likely downloaded successfully, but macOS Squirrel rejected the unsigned package afterward. Download the `.dmg` from GitHub Releases manually, or code-sign and notarize future builds.
 
 ### macOS update downloads but won’t install
 

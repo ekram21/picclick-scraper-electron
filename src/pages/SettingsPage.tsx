@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 
 const GITHUB_URL = 'https://github.com/ekram21'
+const RELEASES_URL = 'https://github.com/ekram21/picclick-scraper-electron/releases/latest'
 const SUPPORT_EMAIL = 'ekram@edutechs.app'
 
 export function SettingsPage() {
@@ -180,6 +181,17 @@ export function SettingsPage() {
                 </Button>
               )}
             </div>
+            <p className="text-xs text-muted-foreground">
+              On macOS, in-app install requires a code-signed build. If restart fails,{' '}
+              <button
+                type="button"
+                className="text-emerald-400 transition-colors hover:text-emerald-300"
+                onClick={() => void window.api.app.openExternal(RELEASES_URL)}
+              >
+                download the .dmg manually
+              </button>
+              .
+            </p>
           </CardContent>
         </Card>
 

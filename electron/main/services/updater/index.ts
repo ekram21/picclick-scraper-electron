@@ -15,6 +15,18 @@ export function getUpdateStatus(): UpdateStatus {
 
 function formatUpdateError(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err)
+  const lower = raw.toLowerCase()
+
+  if (
+    lower.includes('code signature') ||
+    lower.includes('codesign') ||
+    lower.includes('not signed') ||
+    lower.includes('squirrel') ||
+    lower.includes('could not cast') ||
+    lower.includes('objectivec exception')
+  ) {
+    return 'Update downloaded but macOS blocked installation — the app must be code-signed for in-app updates. Download the .dmg from GitHub Releases instead.'
+  }
 
   if (
     raw.includes('ERR_UPDATER_CHANNEL_FILE_NOT_FOUND') ||
@@ -36,7 +48,7 @@ function formatUpdateError(err: unknown): string {
     return 'No published releases found yet. Ship the first release with npm run deploy:live. If the repo is private, make it public for OTA updates to work.'
   }
 
-  if (raw.includes('403') || raw.toLowerCase().includes('authentication')) {
+  if (raw.includes('403') || lower.includes('authentication')) {
     return 'Cannot reach GitHub Releases. If the repository is private, make it public or use a custom update server.'
   }
 
@@ -46,7 +58,7 @@ function formatUpdateError(err: unknown): string {
 
   // electron-updater sometimes embeds huge JSON response bodies in the message
   if (raw.length > 120) {
-    return 'Update check failed. No release may be published yet, or GitHub Releases is unreachable.'
+    return 'Update check failed — see app logs for details, or install manually from GitHub Releases.'
   }
 
   return `Update check failed: ${raw}`
@@ -67,7 +79,11 @@ export function setupAutoUpdater(): void {
 
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
-  autoUpdater.logger = null // suppress verbose updater logs in console
+  autoUpdater.logger = {
+    info: (message) => logger.info(`[updater] ${message}`),
+    warn: (message) => logger.warn(`[updater] ${message}`),
+    error: (message) => logger.error(`[updater] ${message}`)
+  }
 
   autoUpdater.on('checking-for-update', () => {
     broadcast({ checking: true, message: 'Checking for updates…' })
@@ -106,8 +122,25 @@ export function setupAutoUpdater(): void {
   })
 
   autoUpdater.on('error', (err) => {
+    const raw = err instanceof Error ? err.message : String(err)
+    logger.error(`Auto-updater error: ${raw}`)
+
+    // macOS Squirrel validation often fails after a successful zip download (e.g. unsigned builds).
+    // Keep the "restart to install" state instead of wiping it.
+    if (currentStatus.downloaded) {
+      broadcast({
+        checking: false,
+        available: true,
+        downloaded: true,
+        version: currentStatus.version,
+        message: currentStatus.version
+          ? `Update v${currentStatus.version} ready — restart to install`
+          : 'Update ready — restart to install'
+      })
+      return
+    }
+
     const message = formatUpdateError(err)
-    logger.error(`Auto-updater error: ${message}`)
     broadcast({
       checking: false,
       available: false,

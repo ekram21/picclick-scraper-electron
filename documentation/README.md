@@ -41,6 +41,7 @@ Use this folder to understand how the app works and how to extend it safely.
 |-----|----------------|
 | [PRODUCT_SPECIFICATION.md](./PRODUCT_SPECIFICATION.md) | Original product spec |
 | [OTA_UPDATES.md](./OTA_UPDATES.md) | How to ship live updates to users |
+| [MACOS_SIGNING.md](./MACOS_SIGNING.md) | Apple Developer ID signing + notarization for CI |
 
 ## Quick extension guide
 
